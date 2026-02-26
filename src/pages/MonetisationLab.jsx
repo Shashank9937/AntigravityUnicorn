@@ -33,19 +33,25 @@ export function MonetisationLab() {
 
     return (
         <div>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">Monetisation Lab</h1>
                 <p className="page-description">Experiment with value capture models and unit economics.</p>
-            </div>
+            </header>
 
-            <div className="flex-col gap-6">
+            <div className="flex-col gap-6 stagger-children">
                 {Object.entries(data.models).map(([modelName, modelData]) => {
                     const ratio = modelData.cac > 0 ? (modelData.ltv / modelData.cac).toFixed(1) : 0;
                     const isDanger = modelData.viable && ratio > 0 && ratio < 3;
                     const isHealthy = modelData.viable && ratio >= 3;
 
                     return (
-                        <div key={modelName} className={`card ${modelData.viable ? 'border-brand-primary' : 'border-color'}`}>
+                        <div
+                            key={modelName}
+                            className="card animate-fade-in-up"
+                            style={{
+                                borderColor: modelData.viable ? 'rgba(99, 102, 241, 0.3)' : 'var(--border-color)',
+                            }}
+                        >
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="card-title mb-0">{modelName}</h3>
                                 <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold">
@@ -59,8 +65,8 @@ export function MonetisationLab() {
                             </div>
 
                             {modelData.viable && (
-                                <div className="grid-4 bg-surface-elevated p-4 rounded mt-4 items-end">
-                                    <div className="form-group flex-col">
+                                <div className="grid-4 p-4 rounded mt-4 items-end" style={{ background: 'var(--bg-surface-elevated)' }}>
+                                    <div className="form-group">
                                         <label className="form-label">Tier Name</label>
                                         <input
                                             type="text"
@@ -69,7 +75,7 @@ export function MonetisationLab() {
                                             onChange={(e) => handleChange(modelName, 'tier', e.target.value)}
                                         />
                                     </div>
-                                    <div className="form-group flex-col">
+                                    <div className="form-group">
                                         <label className="form-label">ARPU ($)</label>
                                         <input
                                             type="number"
@@ -78,7 +84,7 @@ export function MonetisationLab() {
                                             onChange={(e) => handleChange(modelName, 'arpu', parseFloat(e.target.value))}
                                         />
                                     </div>
-                                    <div className="form-group flex-col">
+                                    <div className="form-group">
                                         <label className="form-label">LTV ($)</label>
                                         <input
                                             type="number"
@@ -87,7 +93,7 @@ export function MonetisationLab() {
                                             onChange={(e) => handleChange(modelName, 'ltv', parseFloat(e.target.value))}
                                         />
                                     </div>
-                                    <div className="form-group flex-col">
+                                    <div className="form-group">
                                         <label className="form-label">CAC ($)</label>
                                         <input
                                             type="number"
@@ -100,10 +106,10 @@ export function MonetisationLab() {
                             )}
 
                             {modelData.viable && modelData.cac > 0 && (
-                                <div className="mt-4 flex items-center gap-4 border-t border-color pt-4">
+                                <div className="mt-4 flex items-center gap-4 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
                                     <div className="flex-col">
                                         <span className="text-secondary text-xs uppercase font-bold tracking-wide">Unit Economics</span>
-                                        <div className={`text-2xl font-bold mt-1 ${isDanger ? 'text-danger' : isHealthy ? 'text-success' : ''}`}>
+                                        <div className="text-2xl font-bold mt-1" style={{ color: isDanger ? '#f87171' : isHealthy ? '#34d399' : 'var(--text-primary)' }}>
                                             LTV:CAC = {ratio}
                                         </div>
                                     </div>
@@ -120,7 +126,7 @@ export function MonetisationLab() {
                                 </div>
                             )}
                         </div>
-                    )
+                    );
                 })}
             </div>
         </div>

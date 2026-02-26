@@ -37,102 +37,175 @@ export function KPIDashboard() {
 
     const c = kpis.current;
 
+    const tooltipStyle = {
+        backgroundColor: 'var(--bg-surface)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-md)',
+        boxShadow: 'var(--shadow-lg)',
+    };
+
     return (
         <div>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">KPI Dashboard</h1>
                 <p className="page-description">The heartbeat of the business. Measure what matters.</p>
-            </div>
+            </header>
 
-            <div className="grid-3 mb-6">
-                <div className="card text-center p-6 border-brand-primary">
-                    <h3 className="text-secondary text-sm font-bold uppercase tracking-widest mb-2">MRR</h3>
-                    <input name="mrr" type="number" className="text-4xl font-black text-center bg-transparent border-none outline-none w-full text-brand-primary drop-shadow-sm mb-1" value={c.mrr} onChange={handleChange} />
-                    <span className="text-xs text-secondary italic">Monthly Recurring Revenue</span>
+            <div className="dashboard-grid mb-8 stagger-children">
+                <div className="stat-card animate-fade-in-up" style={{ borderColor: 'rgba(99, 102, 241, 0.3)' }}>
+                    <div className="stat-label">MRR</div>
+                    <input
+                        name="mrr"
+                        type="number"
+                        className="inline-edit-number"
+                        style={{ fontSize: 'var(--text-3xl)', color: 'var(--brand-primary)' }}
+                        value={c.mrr}
+                        onChange={handleChange}
+                        aria-label="Monthly Recurring Revenue"
+                    />
+                    <div className="stat-hint">Monthly Recurring Revenue</div>
                 </div>
 
-                <div className={`card text-center p-6 ${c.runway < 6 ? 'border-brand-danger bg-brand-danger bg-opacity-10' : 'border-brand-success'}`}>
-                    <h3 className="text-secondary text-sm font-bold uppercase tracking-widest mb-2">Runway</h3>
+                <div className="stat-card animate-fade-in-up" style={{
+                    borderColor: c.runway < 6 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)',
+                }}>
+                    <div className="stat-label">Runway</div>
                     <div className="flex items-end justify-center">
-                        <input name="runway" type="number" className={`text-4xl font-black text-center bg-transparent border-none outline-none w-24 ${c.runway < 6 ? 'text-danger' : 'text-success'}`} value={c.runway} onChange={handleChange} />
-                        <span className="text-2xl font-bold text-secondary mb-1 ml-1">mo</span>
+                        <input
+                            name="runway"
+                            type="number"
+                            className="inline-edit-number"
+                            style={{
+                                fontSize: 'var(--text-3xl)',
+                                color: c.runway < 6 ? '#f87171' : '#34d399',
+                                width: '5rem',
+                            }}
+                            value={c.runway}
+                            onChange={handleChange}
+                            aria-label="Runway in months"
+                        />
+                        <span className="text-lg font-bold text-secondary" style={{ marginBottom: 2, marginLeft: 4 }}>mo</span>
                     </div>
-                    <span className="text-xs text-secondary italic">{c.runway < 6 ? '⚠️ CRITICAL: Raise or cut burn' : 'Healthy buffer'}</span>
+                    <div className="stat-hint">{c.runway < 6 ? '⚠️ CRITICAL: Raise or cut burn' : 'Healthy buffer'}</div>
                 </div>
 
-                <div className="card text-center p-6">
-                    <h3 className="text-secondary text-sm font-bold uppercase tracking-widest mb-2">Burn Rate</h3>
+                <div className="stat-card animate-fade-in-up">
+                    <div className="stat-label">Burn Rate</div>
                     <div className="flex justify-center items-center">
-                        <span className="text-2xl font-bold text-secondary mr-1">-$</span>
-                        <input name="burn" type="number" className="text-4xl font-black text-center bg-transparent border-none outline-none w-32 text-primary" value={c.burn} onChange={handleChange} />
+                        <span className="text-lg font-bold text-secondary" style={{ marginRight: 2 }}>-$</span>
+                        <input
+                            name="burn"
+                            type="number"
+                            className="inline-edit-number"
+                            style={{ fontSize: 'var(--text-3xl)', width: '7rem' }}
+                            value={c.burn}
+                            onChange={handleChange}
+                            aria-label="Monthly net burn"
+                        />
                     </div>
-                    <span className="text-xs text-secondary italic">Monthly net burn</span>
+                    <div className="stat-hint">Monthly net burn</div>
                 </div>
 
-                <div className="card text-center p-6">
-                    <h3 className="text-secondary text-sm font-bold uppercase tracking-widest mb-2">Customers</h3>
-                    <input name="customers" type="number" className="text-4xl font-black text-center bg-transparent border-none outline-none w-full text-primary" value={c.customers} onChange={handleChange} />
-                    <span className="text-xs text-secondary italic">Active paying users</span>
+                <div className="stat-card animate-fade-in-up">
+                    <div className="stat-label">Customers</div>
+                    <input
+                        name="customers"
+                        type="number"
+                        className="inline-edit-number"
+                        style={{ fontSize: 'var(--text-3xl)' }}
+                        value={c.customers}
+                        onChange={handleChange}
+                        aria-label="Active paying users"
+                    />
+                    <div className="stat-hint">Active paying users</div>
                 </div>
 
-                <div className={`card text-center p-6 ${c.churn > 5 ? 'border-brand-danger' : ''}`}>
-                    <h3 className="text-secondary text-sm font-bold uppercase tracking-widest mb-2">Churn %</h3>
+                <div className="stat-card animate-fade-in-up" style={{
+                    borderColor: c.churn > 5 ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-color)',
+                }}>
+                    <div className="stat-label">Churn %</div>
                     <div className="flex justify-center items-end">
-                        <input name="churn" type="number" className={`text-4xl font-black text-center bg-transparent border-none outline-none w-24 ${c.churn > 5 ? 'text-danger' : 'text-primary'}`} value={c.churn} onChange={handleChange} />
-                        <span className="text-2xl font-bold text-secondary mb-1">%</span>
+                        <input
+                            name="churn"
+                            type="number"
+                            className="inline-edit-number"
+                            style={{
+                                fontSize: 'var(--text-3xl)',
+                                color: c.churn > 5 ? '#f87171' : 'var(--text-primary)',
+                                width: '5rem',
+                            }}
+                            value={c.churn}
+                            onChange={handleChange}
+                            aria-label="Churn percentage"
+                        />
+                        <span className="text-lg font-bold text-secondary" style={{ marginBottom: 2 }}>%</span>
                     </div>
-                    <span className="text-xs text-secondary italic">{c.churn > 5 ? 'Leaky bucket. Fix retention.' : 'Healthy retention'}</span>
+                    <div className="stat-hint">{c.churn > 5 ? 'Leaky bucket. Fix retention.' : 'Healthy retention'}</div>
                 </div>
 
-                <div className={`card text-center p-6 ${c.growth < 10 ? 'border-brand-warning' : 'border-brand-success'}`}>
-                    <h3 className="text-secondary text-sm font-bold uppercase tracking-widest mb-2">MoM Growth</h3>
+                <div className="stat-card animate-fade-in-up" style={{
+                    borderColor: c.growth < 10 ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)',
+                }}>
+                    <div className="stat-label">MoM Growth</div>
                     <div className="flex justify-center items-end">
-                        <input name="growth" type="number" className={`text-4xl font-black text-center bg-transparent border-none outline-none w-24 ${c.growth >= 10 ? 'text-success' : 'text-warning'}`} value={c.growth} onChange={handleChange} />
-                        <span className="text-2xl font-bold text-secondary mb-1">%</span>
+                        <input
+                            name="growth"
+                            type="number"
+                            className="inline-edit-number"
+                            style={{
+                                fontSize: 'var(--text-3xl)',
+                                color: c.growth >= 10 ? '#34d399' : '#fbbf24',
+                                width: '5rem',
+                            }}
+                            value={c.growth}
+                            onChange={handleChange}
+                            aria-label="Month over month growth"
+                        />
+                        <span className="text-lg font-bold text-secondary" style={{ marginBottom: 2 }}>%</span>
                     </div>
-                    <span className="text-xs text-secondary italic">{c.growth >= 10 ? 'Unicorn trajectory' : 'Push for 10% MoM'}</span>
+                    <div className="stat-hint">{c.growth >= 10 ? 'Unicorn trajectory' : 'Push for 10% MoM'}</div>
                 </div>
             </div>
 
-            <div className="grid-2">
-                <div className="card">
+            <div className="grid-2 stagger-children">
+                <div className="card animate-fade-in-up">
                     <h2 className="card-title mb-6">MRR Growth Trajectory</h2>
-                    <div className="h-64 w-full text-xs">
+                    <div style={{ width: '100%', height: 256 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={kpis.history} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorMrr" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#242424" vertical={false} />
-                                <XAxis dataKey="month" stroke="#666666" tick={{ fill: '#a0a0a0' }} axisLine={false} tickLine={false} />
-                                <YAxis stroke="#666666" tick={{ fill: '#a0a0a0' }} axisLine={false} tickLine={false} tickFormatter={(value) => `$${value}`} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                <XAxis dataKey="month" stroke="#55556a" tick={{ fill: '#8b8b9e', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                <YAxis stroke="#55556a" tick={{ fill: '#8b8b9e', fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(value) => `$${value}`} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #444', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#ededed' }}
+                                    contentStyle={tooltipStyle}
+                                    itemStyle={{ color: '#eaeaf0' }}
                                     formatter={(value) => [`$${value}`, 'MRR']}
                                 />
-                                <Area type="monotone" dataKey="mrr" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorMrr)" />
+                                <Area type="monotone" dataKey="mrr" stroke="#6366f1" strokeWidth={2.5} fillOpacity={1} fill="url(#colorMrr)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                <div className="card">
+                <div className="card animate-fade-in-up">
                     <h2 className="card-title mb-6">User Base Growth</h2>
-                    <div className="h-64 w-full text-xs">
+                    <div style={{ width: '100%', height: 256 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={kpis.history} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#242424" vertical={false} />
-                                <XAxis dataKey="month" stroke="#666666" tick={{ fill: '#a0a0a0' }} axisLine={false} tickLine={false} />
-                                <YAxis stroke="#666666" tick={{ fill: '#a0a0a0' }} axisLine={false} tickLine={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                <XAxis dataKey="month" stroke="#55556a" tick={{ fill: '#8b8b9e', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                <YAxis stroke="#55556a" tick={{ fill: '#8b8b9e', fontSize: 12 }} axisLine={false} tickLine={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #444', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#ededed' }}
+                                    contentStyle={tooltipStyle}
+                                    itemStyle={{ color: '#eaeaf0' }}
                                 />
-                                <Line type="monotone" dataKey="users" stroke="#10b981" strokeWidth={3} dot={{ stroke: '#10b981', strokeWidth: 2, r: 4, fill: '#111' }} activeDot={{ r: 6 }} />
+                                <Line type="monotone" dataKey="users" stroke="#10b981" strokeWidth={2.5} dot={{ stroke: '#10b981', strokeWidth: 2, r: 4, fill: '#0e0e14' }} activeDot={{ r: 6 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>

@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { loadData, updateModule } from '../utils/storage';
+import { loadData, saveData } from '../utils/storage';
+import { toast } from 'sonner';
 
 export function IdeaEngine() {
     const [ideas, setIdeas] = useState([]);
-
     const [form, setForm] = useState({
-        name: '',
-        category: '',
-        description: '',
-        hypothesis: '',
-        riskiestAssumption: '',
-        unfairAdvantage: '',
-        status: 'Seed'
+        name: '', category: '', status: 'Seed', description: '', hypothesis: '',
+        risk: '', advantage: ''
     });
 
     useEffect(() => {
         const data = loadData();
-        setIdeas(data.ideasList || []);
+        if (data.ideasList && Array.isArray(data.ideasList)) {
+            setIdeas(data.ideasList);
+        }
     }, []);
 
     const handleChange = (e) => {
@@ -25,40 +22,32 @@ export function IdeaEngine() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!form.riskiestAssumption || !form.unfairAdvantage || !form.name) {
-            alert("Name, Riskiest Assumption, and Why Me (Unfair Advantage) are mandatory.");
+        if (!form.name || !form.risk || !form.advantage) {
+            toast.error('Name, Riskiest Assumption, and Unfair Advantage are mandatory.');
             return;
         }
 
         const newIdea = { ...form, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] };
-        const updated = [...ideas, newIdea];
+        const updated = [newIdea, ...ideas];
         setIdeas(updated);
 
-        // Save to storage
         const data = loadData();
         data.ideasList = updated;
-        localStorage.setItem('unicorn_builder_os_data', JSON.stringify(data));
+        saveData(data);
 
-        setForm({
-            name: '',
-            category: '',
-            description: '',
-            hypothesis: '',
-            riskiestAssumption: '',
-            unfairAdvantage: '',
-            status: 'Seed'
-        });
+        toast.success(`Idea logged: ${form.name}`);
+        setForm({ name: '', category: '', status: 'Seed', description: '', hypothesis: '', risk: '', advantage: '' });
     };
 
     return (
         <div>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">Idea Engine</h1>
                 <p className="page-description">Log, refine, and stress-test your startup ideas.</p>
-            </div>
+            </header>
 
             <div className="grid-2">
-                <div className="card">
+                <div className="card animate-fade-in-up">
                     <h2 className="card-title">Add New Idea</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
@@ -67,7 +56,7 @@ export function IdeaEngine() {
                         </div>
                         <div className="form-group">
                             <label className="form-label">Category</label>
-                            <input name="category" placeholder="e.g. SaaS, Marketplace..." className="form-input" value={form.category} onChange={handleChange} />
+                            <input name="category" className="form-input" placeholder="e.g. SaaS, Marketplace..." value={form.category} onChange={handleChange} />
                         </div>
                         <div className="form-group">
                             <label className="form-label">Status</label>
@@ -76,8 +65,7 @@ export function IdeaEngine() {
                                 <option>Exploring</option>
                                 <option>Active</option>
                                 <option>Paused</option>
-                                <option>Dropped</option>
-                                <option>Revisit</option>
+                                <option>Dead</option>
                             </select>
                         </div>
                         <div className="form-group">
@@ -89,32 +77,60 @@ export function IdeaEngine() {
                             <textarea name="hypothesis" className="form-textarea" placeholder="If we build X, then Y will happen..." value={form.hypothesis} onChange={handleChange} />
                         </div>
                         <div className="form-group">
-                            <label className="form-label text-danger">Riskiest Assumption *</label>
-                            <textarea name="riskiestAssumption" className="form-textarea border-danger" placeholder="What must be true for this to work?" value={form.riskiestAssumption} onChange={handleChange} required />
+                            <label className="form-label text-danger font-bold">Riskiest Assumption *</label>
+                            <textarea
+                                name="risk"
+                                className="form-textarea"
+                                style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                                placeholder="What single thing, if false, kills this idea?"
+                                value={form.risk}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
                         <div className="form-group">
-                            <label className="form-label text-success">Why Me? (Unfair Advantage) *</label>
-                            <textarea name="unfairAdvantage" className="form-textarea border-success" placeholder="Why are you uniquely positioned to win?" value={form.unfairAdvantage} onChange={handleChange} required />
+                            <label className="form-label font-bold" style={{ color: 'var(--brand-primary-hover)' }}>Unfair Advantage *</label>
+                            <textarea
+                                name="advantage"
+                                className="form-textarea"
+                                style={{ borderColor: 'rgba(99, 102, 241, 0.3)' }}
+                                placeholder="What is your moat? Why can't someone bigger just copy you?"
+                                value={form.advantage}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
-                        <div className="flex justify-end gap-2 mt-4">
-                            <button type="button" className="btn btn-secondary" onClick={() => alert("AI Refinement Placeholder")}>✨ AI Refine</button>
-                            <button type="submit" className="btn btn-primary">Save Idea</button>
-                        </div>
+                        <button type="submit" className="btn btn-primary mt-2">Submit Idea</button>
                     </form>
                 </div>
 
-                <div>
+                <div className="flex-col gap-6">
                     <h2 className="card-title">Recent Ideas</h2>
-                    <div className="flex-col gap-4">
-                        {ideas.length === 0 ? <p className="text-secondary">No ideas logged yet. Start ideating!</p> : null}
-                        {ideas.map(idea => (
-                            <div key={idea.id} className="card">
-                                <div className="flex justify-between mb-2">
-                                    <h3 className="font-bold">{idea.name}</h3>
-                                    <span className="badge badge-gray">{idea.status}</span>
+                    {ideas.length === 0 ? <p className="text-secondary text-sm">No ideas logged yet. Start ideating!</p> : null}
+                    <div className="flex-col gap-4 stagger-children">
+                        {ideas.slice(0, 8).map(idea => (
+                            <div
+                                key={idea.id}
+                                className="card p-5 animate-fade-in-up"
+                                style={{
+                                    borderColor: idea.status === 'Active' ? 'rgba(16, 185, 129, 0.3)' : idea.status === 'Dead' ? 'rgba(239, 68, 68, 0.2)' : 'var(--border-color)',
+                                }}
+                            >
+                                <div className="flex justify-between items-start mb-2">
+                                    <h3 className="font-bold text-lg">{idea.name}</h3>
+                                    <span className={`badge ${idea.status === 'Active' ? 'badge-green' : idea.status === 'Dead' ? 'badge-red' : idea.status === 'Paused' ? 'badge-yellow' : 'badge-gray'}`}>{idea.status}</span>
                                 </div>
-                                <p className="text-sm text-secondary mb-2">{idea.description}</p>
-                                <p className="text-xs text-danger font-medium">⚠️ {idea.riskiestAssumption}</p>
+                                {idea.description && <p className="text-sm text-secondary mb-3">{idea.description}</p>}
+                                <div className="grid-2 mt-3">
+                                    <div className="p-3 rounded text-sm" style={{ background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
+                                        <span className="text-danger text-xs font-bold uppercase tracking-wider block mb-1">Risk</span>
+                                        <span className="text-secondary">{idea.risk || 'N/A'}</span>
+                                    </div>
+                                    <div className="p-3 rounded text-sm" style={{ background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.15)' }}>
+                                        <span className="text-xs font-bold uppercase tracking-wider block mb-1" style={{ color: 'var(--brand-primary-hover)' }}>Advantage</span>
+                                        <span className="text-secondary">{idea.advantage || 'N/A'}</span>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>

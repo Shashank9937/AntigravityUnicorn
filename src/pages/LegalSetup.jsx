@@ -38,46 +38,56 @@ export function LegalSetup() {
     const totalCount = CHECKLIST_ITEMS.length;
     const progressRatio = completedCount / totalCount;
 
-    let statusColor = 'text-danger';
-    let badgeColor = 'badge-red';
+    let statusColor = '#f87171';
+    let badgeClass = 'badge-red';
     let statusText = 'Critical Risk Zone';
 
     if (progressRatio === 1) {
-        statusColor = 'text-success';
-        badgeColor = 'badge-green';
+        statusColor = '#34d399';
+        badgeClass = 'badge-green';
         statusText = 'Execution Ready & Protected';
     } else if (progressRatio > 0.5) {
-        statusColor = 'text-warning';
-        badgeColor = 'badge-yellow';
-        statusText = 'Partial Coverage - Fix Gaps';
+        statusColor = '#fbbf24';
+        badgeClass = 'badge-yellow';
+        statusText = 'Partial Coverage — Fix Gaps';
     }
+
+    const progressFill = progressRatio === 1
+        ? 'var(--brand-success)'
+        : progressRatio > 0.5
+            ? 'var(--brand-warning)'
+            : 'var(--brand-danger)';
 
     return (
         <div>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">Legal Setup</h1>
-                <p className="page-description">Protect the foundation. Don’t build an empire on sand.</p>
-            </div>
+                <p className="page-description">Protect the foundation. Don't build an empire on sand.</p>
+            </header>
 
             <div className="grid-2">
-                <div className="card">
+                <div className="card animate-fade-in-up">
                     <h2 className="card-title mb-6">Execution Checklist</h2>
-                    <div className="flex-col gap-4">
+                    <div className="flex-col gap-4 stagger-children">
                         {CHECKLIST_ITEMS.map((item) => (
                             <label
                                 key={item.key}
-                                className={`flex gap-4 p-4 rounded border cursor-pointer transition-colors ${checklist[item.key] ? 'bg-brand-success bg-opacity-10 border-brand-success' : 'bg-surface-elevated border-color hover:border-brand-primary'}`}
+                                className="flex gap-4 p-4 rounded border cursor-pointer animate-fade-in-up"
+                                style={{
+                                    background: checklist[item.key] ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-surface-elevated)',
+                                    borderColor: checklist[item.key] ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-color)',
+                                    transition: 'all var(--duration-base) ease',
+                                }}
                             >
                                 <div className="pt-1">
                                     <input
                                         type="checkbox"
-                                        className="w-4 h-4"
                                         checked={checklist[item.key] || false}
                                         onChange={(e) => handleChange(item.key, e.target.checked)}
                                     />
                                 </div>
                                 <div>
-                                    <span className={`block font-bold mb-1 ${checklist[item.key] ? 'text-success' : 'text-primary'}`}>{item.label}</span>
+                                    <span className="block font-bold mb-1" style={{ color: checklist[item.key] ? '#34d399' : 'var(--text-primary)' }}>{item.label}</span>
                                     <p className="text-secondary text-sm leading-relaxed">{item.explanation}</p>
                                 </div>
                             </label>
@@ -86,17 +96,22 @@ export function LegalSetup() {
                 </div>
 
                 <div className="flex-col gap-6">
-                    <div className="card text-center p-8">
+                    <div className="card text-center p-6 animate-fade-in-up">
                         <h3 className="uppercase tracking-widest text-secondary text-sm font-bold mb-4">Risk Status</h3>
-                        <div className={`text-6xl font-black mb-4 ${statusColor}`}>
-                            <span className="opacity-50 text-4xl mr-2">Status:</span> {Math.round(progressRatio * 100)}%
+                        <div className="mb-4" style={{ fontSize: 'var(--text-4xl)', fontWeight: 900, color: statusColor }}>
+                            <span style={{ opacity: 0.5, fontSize: 'var(--text-xl)', marginRight: 8 }}>Status:</span>
+                            {Math.round(progressRatio * 100)}%
                         </div>
-                        <span className={`badge ${badgeColor} text-lg px-6 py-2 shadow-lg mb-6 block w-max mx-auto`}>{statusText}</span>
-                        <div className="h-4 bg-surface-elevated rounded-full w-full overflow-hidden">
+                        <span className={`badge ${badgeClass} text-lg py-1 px-6`} style={{ display: 'inline-block', marginBottom: 'var(--space-6)' }}>{statusText}</span>
+                        <div className="progress-bar" style={{ height: 10 }}>
                             <div
-                                className={`h-full transition-all duration-500 rounded-full ${progressRatio === 1 ? 'bg-brand-success' : progressRatio > 0.5 ? 'bg-brand-warning' : 'bg-brand-danger'}`}
-                                style={{ width: `${Math.max(5, progressRatio * 100)}%` }}
-                            ></div>
+                                className="progress-bar-fill"
+                                style={{
+                                    width: `${Math.max(5, progressRatio * 100)}%`,
+                                    background: progressFill,
+                                    transition: 'width 0.5s var(--ease-out)',
+                                }}
+                            />
                         </div>
                         {progressRatio < 1 && (
                             <p className="text-sm mt-8 text-secondary max-w-sm mx-auto">

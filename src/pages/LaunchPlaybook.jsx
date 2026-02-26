@@ -49,14 +49,14 @@ export function LaunchPlaybook() {
 
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">Launch Playbook</h1>
                 <p className="page-description">Distribution is king. Coordinate your initial velocity and compound it.</p>
-            </div>
+            </header>
 
             <div className="grid-2">
                 <div className="flex-col gap-6">
-                    <div className="card">
+                    <div className="card animate-fade-in-up">
                         <h2 className="card-title">Pre-Launch Asset Factory</h2>
                         <div className="flex-col gap-3">
                             {[
@@ -66,12 +66,20 @@ export function LaunchPlaybook() {
                                 { k: 'makers', label: 'Maker Comment & Backstory Prepared' },
                                 { k: 'cta', label: 'Frictionless Sign-up & Onboarding Flow' }
                             ].map(asset => (
-                                <label key={asset.k} className={`flex items-center gap-3 p-3 rounded border cursor-pointer transition-all ${playbook.assets[asset.k] ? 'bg-brand-success bg-opacity-10 border-brand-success text-success' : 'bg-surface-elevated border-color hover:border-brand-primary'}`}>
+                                <label
+                                    key={asset.k}
+                                    className="flex items-center gap-3 p-3 rounded border cursor-pointer"
+                                    style={{
+                                        background: playbook.assets[asset.k] ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-surface-elevated)',
+                                        borderColor: playbook.assets[asset.k] ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-color)',
+                                        color: playbook.assets[asset.k] ? '#34d399' : 'var(--text-primary)',
+                                        transition: 'all var(--duration-base) ease',
+                                    }}
+                                >
                                     <input
                                         type="checkbox"
                                         checked={playbook.assets[asset.k] || false}
                                         onChange={(e) => handleAssetChange(asset.k, e.target.checked)}
-                                        className="w-4 h-4 cursor-pointer"
                                     />
                                     <span className="font-medium text-sm">{asset.label}</span>
                                 </label>
@@ -79,10 +87,11 @@ export function LaunchPlaybook() {
                         </div>
                     </div>
 
-                    <div className="card">
+                    <div className="card animate-fade-in-up">
                         <h2 className="card-title">Strategic Launch Notes</h2>
                         <textarea
-                            className="form-textarea w-full h-32"
+                            className="form-textarea w-full"
+                            style={{ height: 128 }}
                             placeholder="Hunt angles, key influencers to DM, specific timing/timezone tactics..."
                             value={playbook.notes}
                             onChange={(e) => {
@@ -97,13 +106,17 @@ export function LaunchPlaybook() {
                     </div>
                 </div>
 
-                <div className="card">
+                <div className="card animate-fade-in-up">
                     <h2 className="card-title mb-6">Distribution Channels</h2>
-                    <div className="flex-col gap-4">
+                    <div className="flex-col gap-4 stagger-children">
                         {LAUNCH_PLATFORMS.map(platform => (
                             <motion.div
                                 key={platform.key}
-                                className={`p-4 rounded border ${playbook.status[platform.key] === 'Launched' ? 'border-brand-primary bg-brand-primary bg-opacity-5' : 'border-color bg-surface-elevated'}`}
+                                className="p-4 rounded border animate-fade-in-up"
+                                style={{
+                                    borderColor: playbook.status[platform.key] === 'Launched' ? 'rgba(99, 102, 241, 0.3)' : 'var(--border-color)',
+                                    background: playbook.status[platform.key] === 'Launched' ? 'rgba(99, 102, 241, 0.04)' : 'var(--bg-surface-elevated)',
+                                }}
                                 layout
                             >
                                 <div className="flex justify-between items-start mb-2">
@@ -113,7 +126,8 @@ export function LaunchPlaybook() {
                                         <p className="text-secondary text-xs italic mt-1 pb-1">Audience: {platform.audience}</p>
                                     </div>
                                     <select
-                                        className="form-select text-sm w-32"
+                                        className="form-select text-sm"
+                                        style={{ width: 120 }}
                                         value={playbook.status[platform.key] || 'Drafting'}
                                         onChange={(e) => handleStatusChange(platform.key, e.target.value)}
                                     >

@@ -2,21 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { loadData, saveData } from '../utils/storage';
 
 const MOAT_TYPES = [
-    'Proprietary Data',
     'Network Effects',
     'Switching Costs',
-    'Brand & Trust',
-    'Regulatory',
-    'Unique Distribution',
-    'Operational Excellence'
+    'Scale Economies',
+    'Proprietary Data',
+    'Brand Equity',
+    'Regulatory Moat',
+    'Community Lock-in',
+    'Vertical Integration',
+    'Founder Expertise',
+    'Legal IP (Patents)'
 ];
 
 export function MoatBuilder() {
     const [moat, setMoat] = useState({
-        primary: '',
-        secondary: '',
-        timeline: '',
-        stressTest: null
+        primary: '', secondary: '', timeline: '', stressTest: '',
+        defensibility: '',
+        confidence: 3
     });
 
     useEffect(() => {
@@ -26,8 +28,8 @@ export function MoatBuilder() {
         }
     }, []);
 
-    const handleChange = (e) => {
-        const updated = { ...moat, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value };
+    const handleChange = (field, value) => {
+        const updated = { ...moat, [field]: value };
         setMoat(updated);
 
         const data = loadData();
@@ -35,94 +37,121 @@ export function MoatBuilder() {
         saveData(data);
     };
 
-    const getMoatColor = (type) => {
-        switch (type) {
-            case 'Proprietary Data': return 'linear-gradient(135deg, #1e3a8a, #3b82f6)';
-            case 'Network Effects': return 'linear-gradient(135deg, #4c1d95, #8b5cf6)';
-            case 'Switching Costs': return 'linear-gradient(135deg, #064e3b, #10b981)';
-            case 'Brand & Trust': return 'linear-gradient(135deg, #7c2d12, #f59e0b)';
-            case 'Regulatory': return 'linear-gradient(135deg, #1e293b, #64748b)';
-            case 'Unique Distribution': return 'linear-gradient(135deg, #7f1d1d, #ef4444)';
-            case 'Operational Excellence': return 'linear-gradient(135deg, #0f172a, #475569)';
-            default: return 'var(--bg-surface-elevated)';
-        }
-    };
-
     return (
         <div>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">Moat Builder</h1>
-                <p className="page-description">Design defensibility from day one. Compete to win.</p>
-            </div>
+                <p className="page-description">Defensibility is survival. Are you building a moat or a sandcastle?</p>
+            </header>
 
             <div className="grid-2">
-                <div className="card">
-                    <h2 className="card-title">Define Moat Stack</h2>
-
+                <div className="card animate-fade-in-up">
+                    <h2 className="card-title">Core Moat Design</h2>
                     <div className="form-group">
-                        <label className="form-label">Primary Moat</label>
-                        <select name="primary" className="form-select" value={moat.primary} onChange={handleChange}>
-                            <option value="">Select Primary Defensibility</option>
-                            {MOAT_TYPES.map(m => <option key={m} value={m}>{m}</option>)}
+                        <label className="form-label text-danger font-bold">Primary Moat *</label>
+                        <select className="form-select" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }} value={moat.primary} onChange={(e) => handleChange('primary', e.target.value)}>
+                            <option value="">Select Primary Moat</option>
+                            {MOAT_TYPES.map(m => <option key={m}>{m}</option>)}
                         </select>
                     </div>
-
                     <div className="form-group">
                         <label className="form-label">Secondary Moat</label>
-                        <select name="secondary" className="form-select" value={moat.secondary} onChange={handleChange}>
-                            <option value="">Select Secondary Defensibility</option>
-                            {MOAT_TYPES.map(m => <option key={m} value={m}>{m}</option>)}
+                        <select className="form-select" value={moat.secondary} onChange={(e) => handleChange('secondary', e.target.value)}>
+                            <option value="">Select Secondary Moat</option>
+                            {MOAT_TYPES.filter(m => m !== moat.primary).map(m => <option key={m}>{m}</option>)}
                         </select>
                     </div>
-
                     <div className="form-group">
-                        <label className="form-label">Timeline to Develop (Months)</label>
-                        <input name="timeline" type="number" className="form-input" min="1" placeholder="e.g. 18" value={moat.timeline} onChange={handleChange} />
+                        <label className="form-label">Estimated Time to Build (months)</label>
+                        <input type="number" className="form-input" value={moat.timeline} onChange={(e) => handleChange('timeline', e.target.value)} />
                     </div>
-
-                    <div className="mt-6 flex flex-col gap-2">
-                        <label className="flex items-center justify-between text-sm font-medium bg-surface-elevated p-3 rounded cursor-pointer border border-color hover:border-brand-primary">
-                            Toggle Moat Stress Test
-                            <input type="checkbox" name="stressTest" checked={moat.stressTest || false} onChange={handleChange} />
-                        </label>
-                        {moat.stressTest && (
-                            <div className="p-4 bg-surface-elevated rounded border border-danger border-opacity-50">
-                                <h4 className="text-danger font-medium text-sm mb-2">Stress Test Protocol:</h4>
-                                <ul className="text-secondary text-sm space-y-1 ml-4 list-disc">
-                                    <li>Can a well-funded competitor copy this in 6 months?</li>
-                                    <li>Does this moat compound linearly or exponentially?</li>
-                                    <li>What happens if underlying platforms change terms?</li>
-                                </ul>
-                            </div>
-                        )}
+                    <div className="form-group">
+                        <label className="form-label">How defensible on a 1-5 scale?</label>
+                        <input
+                            type="range"
+                            min="1"
+                            max="5"
+                            value={moat.confidence}
+                            onChange={(e) => handleChange('confidence', Number(e.target.value))}
+                        />
+                        <div className="flex justify-between text-xs text-secondary mt-1">
+                            <span>Weak</span>
+                            <span className="font-bold" style={{ color: moat.confidence >= 4 ? '#34d399' : moat.confidence >= 3 ? '#fbbf24' : '#f87171' }}>
+                                {moat.confidence}/5
+                            </span>
+                            <span>Fortress</span>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <h2 className="card-title mb-6">Moat Visualization</h2>
-                    <div className="flex flex-col gap-4 items-center justify-center p-8 bg-surface border border-color rounded-xl h-[300px]">
-                        {moat.primary ? (
-                            <div
-                                className="w-full max-w-sm rounded-lg p-6 text-center font-bold shadow-lg transform translate-y-2 z-10"
-                                style={{ background: getMoatColor(moat.primary), border: '1px solid rgba(255,255,255,0.1)' }}
-                            >
-                                1. {moat.primary}
-                            </div>
-                        ) : <p className="text-secondary text-sm italic">Select a primary moat</p>}
-
-                        {moat.secondary ? (
-                            <div
-                                className="w-5/6 max-w-xs rounded-lg p-4 text-center font-semibold shadow-md transform -translate-y-2 z-0 opacity-80"
-                                style={{ background: getMoatColor(moat.secondary), border: '1px solid rgba(255,255,255,0.1)' }}
-                            >
-                                2. {moat.secondary}
-                            </div>
-                        ) : moat.primary && <p className="text-secondary text-sm italic">Add a secondary moat</p>}
+                <div className="flex-col gap-6">
+                    <div className="card animate-fade-in-up" style={{ borderColor: 'rgba(245, 158, 11, 0.3)' }}>
+                        <h2 className="card-title">🔩 Stress Test</h2>
+                        <div className="form-group">
+                            <label className="form-label text-warning font-bold">If a $100M competitor copies you, what makes you win?</label>
+                            <textarea
+                                name="stressTest"
+                                className="form-textarea"
+                                style={{ borderColor: 'rgba(245, 158, 11, 0.3)', minHeight: '120px' }}
+                                placeholder="Be brutally honest..."
+                                value={moat.stressTest}
+                                onChange={(e) => handleChange('stressTest', e.target.value)}
+                            />
+                        </div>
                     </div>
 
-                    <p className="text-center text-sm text-secondary mt-4">
-                        Expected Defensibility: {moat.timeline ? `${moat.timeline} months` : 'TBD'}
-                    </p>
+                    <div className="card animate-fade-in-up">
+                        <h2 className="card-title">Moat Defensibility Notes</h2>
+                        <div className="form-group">
+                            <textarea
+                                name="defensibility"
+                                className="form-textarea"
+                                style={{ minHeight: '120px' }}
+                                placeholder="How does this moat get stronger over time?"
+                                value={moat.defensibility}
+                                onChange={(e) => handleChange('defensibility', e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Visual representation */}
+                    {moat.primary && (
+                        <div className="card animate-fade-in-up text-center p-6">
+                            <h3 className="text-secondary uppercase text-xs font-bold tracking-widest mb-4">Moat Stack</h3>
+                            <div className="flex-col gap-3 items-center">
+                                <div
+                                    className="px-6 py-4 rounded-lg font-bold text-lg"
+                                    style={{
+                                        background: 'var(--brand-primary-muted)',
+                                        color: 'var(--brand-primary-hover)',
+                                        border: '1px solid rgba(99, 102, 241, 0.3)',
+                                        width: '100%',
+                                        maxWidth: 320,
+                                    }}
+                                >
+                                    🛡️ {moat.primary}
+                                </div>
+                                {moat.secondary && (
+                                    <div
+                                        className="px-4 py-3 rounded font-semibold text-sm"
+                                        style={{
+                                            background: 'var(--bg-surface-elevated)',
+                                            border: '1px solid var(--border-color)',
+                                            width: '80%',
+                                            maxWidth: 260,
+                                        }}
+                                    >
+                                        🔗 {moat.secondary}
+                                    </div>
+                                )}
+                                {moat.timeline && (
+                                    <div className="text-xs text-secondary mt-2">
+                                        ⏱️ Build time: ~{moat.timeline} months
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

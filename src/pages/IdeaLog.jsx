@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { loadData } from '../utils/storage';
 
 export function IdeaLog() {
@@ -12,67 +12,77 @@ export function IdeaLog() {
         }
     }, []);
 
-    const filteredIdeas = filter === 'All' ? ideas : ideas.filter(i => i.status === filter);
+    const filtered = useMemo(() => {
+        if (filter === 'All') return ideas;
+        return ideas.filter(i => i.status === filter);
+    }, [ideas, filter]);
+
+    const statusOptions = ['All', 'Seed', 'Exploring', 'Active', 'Paused', 'Dead'];
 
     return (
         <div>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">Idea Log</h1>
-                <p className="page-description">The historical vault of hypotheses and pivots.</p>
-            </div>
+                <p className="page-description">Historical record of all ideas. Pattern-match against your own thinking.</p>
+            </header>
 
-            <div className="card">
-                <div className="flex justify-between items-center mb-6 border-b border-color pb-4">
-                    <h2 className="card-title mb-0">Structured Log</h2>
-                    <div className="flex gap-2">
-                        {['All', 'Seed', 'Exploring', 'Active', 'Paused', 'Dropped', 'Revisit'].map(status => (
-                            <button
-                                key={status}
-                                onClick={() => setFilter(status)}
-                                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${filter === status ? 'bg-brand-primary text-white' : 'bg-surface-elevated text-secondary hover:bg-border-color'}`}
-                            >
-                                {status}
-                            </button>
-                        ))}
-                    </div>
+            <div className="card animate-fade-in-up mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-wrap">
+                    {statusOptions.map(s => (
+                        <button
+                            key={s}
+                            className={`btn ${filter === s ? 'btn-primary' : 'btn-secondary'} text-sm`}
+                            onClick={() => setFilter(s)}
+                        >
+                            {s}
+                        </button>
+                    ))}
                 </div>
-
-                {filteredIdeas.length === 0 ? (
-                    <div className="text-center py-12 text-secondary">
-                        <p>No ideas found in this category.</p>
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b border-color text-secondary text-sm uppercase tracking-wider">
-                                    <th className="p-3">Date</th>
-                                    <th className="p-3">Idea</th>
-                                    <th className="p-3">Hypothesis</th>
-                                    <th className="p-3">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredIdeas.map((idea, idx) => (
-                                    <tr key={idea.id || idx} className="border-b border-color border-opacity-50 hover:bg-surface-elevated transition-colors">
-                                        <td className="p-3 text-sm text-secondary whitespace-nowrap">{idea.date || 'Unknown'}</td>
-                                        <td className="p-3 font-bold text-primary">{idea.name}</td>
-                                        <td className="p-3 text-sm text-secondary max-w-md truncate" title={idea.hypothesis}>{idea.hypothesis || '—'}</td>
-                                        <td className="p-3 whitespace-nowrap">
-                                            <span className={`badge ${idea.status === 'Active' ? 'badge-green' :
-                                                    idea.status === 'Dropped' ? 'badge-red' :
-                                                        idea.status === 'Seed' || idea.status === 'Exploring' ? 'badge-blue' : 'badge-yellow'
-                                                }`}>
-                                                {idea.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                <span className="text-sm text-secondary font-bold">{filtered.length} idea{filtered.length !== 1 ? 's' : ''}</span>
             </div>
+
+            {filtered.length === 0 ? (
+                <div className="card text-center py-12 animate-fade-in-up">
+                    <p className="text-secondary">No ideas found. <a href="/idea-engine" className="font-semibold" style={{ color: 'var(--brand-primary-hover)' }}>Start ideating →</a></p>
+                </div>
+            ) : (
+                <div className="card animate-fade-in-up overflow-x-auto">
+                    <table>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                <th className="text-xs text-secondary uppercase tracking-wider font-bold py-3 px-4">Name</th>
+                                <th className="text-xs text-secondary uppercase tracking-wider font-bold py-3 px-4">Category</th>
+                                <th className="text-xs text-secondary uppercase tracking-wider font-bold py-3 px-4">Status</th>
+                                <th className="text-xs text-secondary uppercase tracking-wider font-bold py-3 px-4">Riskiest Assumption</th>
+                                <th className="text-xs text-secondary uppercase tracking-wider font-bold py-3 px-4">Unfair Advantage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtered.map((idea, i) => (
+                                <tr
+                                    key={idea.id || i}
+                                    className="animate-fade-in-up"
+                                    style={{
+                                        borderBottom: '1px solid var(--border-color)',
+                                        animationDelay: `${i * 30}ms`,
+                                    }}
+                                >
+                                    <td className="py-3 px-4 font-bold">{idea.name || 'Untitled'}</td>
+                                    <td className="py-3 px-4 text-sm text-secondary">{idea.category || '—'}</td>
+                                    <td className="py-3 px-4">
+                                        <span className={`badge ${idea.status === 'Active' ? 'badge-green' :
+                                            idea.status === 'Dead' ? 'badge-red' :
+                                                idea.status === 'Paused' ? 'badge-yellow' : 'badge-gray'
+                                            }`}>{idea.status || 'Seed'}</span>
+                                    </td>
+                                    <td className="py-3 px-4 text-sm text-secondary" style={{ maxWidth: 250 }}>{idea.risk || '—'}</td>
+                                    <td className="py-3 px-4 text-sm text-secondary" style={{ maxWidth: 250 }}>{idea.advantage || '—'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }

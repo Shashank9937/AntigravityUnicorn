@@ -51,18 +51,29 @@ export function Fundraising() {
         saveData(stored);
     };
 
+    const getStatusStyle = (status) => {
+        switch (status) {
+            case 'Closed':
+                return { borderColor: 'rgba(16, 185, 129, 0.3)', background: 'rgba(16, 185, 129, 0.04)' };
+            case 'Passed':
+                return { borderColor: 'rgba(239, 68, 68, 0.3)', opacity: 0.5 };
+            default:
+                return { borderColor: 'var(--border-color)', background: 'var(--bg-surface-elevated)' };
+        }
+    };
+
     return (
         <div>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">Fundraising</h1>
                 <p className="page-description">Runway is life. Plan the round. Track the funnel.</p>
-            </div>
+            </header>
 
             <div className="grid-2">
-                <div className="card">
+                <div className="card animate-fade-in-up">
                     <h2 className="card-title">Round Details</h2>
                     <div className="grid-2">
-                        <div className="form-group flex-col">
+                        <div className="form-group">
                             <label className="form-label">Round Type</label>
                             <select name="round" className="form-select" value={data.details.round} onChange={handleDetailsChange}>
                                 <option>Pre-Seed</option>
@@ -71,43 +82,50 @@ export function Fundraising() {
                                 <option>Bridge</option>
                             </select>
                         </div>
-                        <div className="form-group flex-col">
+                        <div className="form-group">
                             <label className="form-label">Amount Raising ($)</label>
                             <input name="amount" className="form-input" value={data.details.amount} onChange={handleDetailsChange} />
                         </div>
-                        <div className="form-group flex-col">
+                        <div className="form-group">
                             <label className="form-label">Post-Money Valuation</label>
                             <input name="valuation" className="form-input" value={data.details.valuation} onChange={handleDetailsChange} />
                         </div>
-                        <div className="form-group flex-col">
+                        <div className="form-group">
                             <label className="form-label text-warning font-bold">New Runway (Months) *</label>
-                            <input name="runway" type="number" className="form-input focus:border-warning" placeholder="Must be 18-24+" value={data.details.runway} onChange={handleDetailsChange} />
+                            <input name="runway" type="number" className="form-input" placeholder="Must be 18-24+" value={data.details.runway} onChange={handleDetailsChange} />
                         </div>
                     </div>
-                    <div className="form-group flex-col mt-4">
+                    <div className="form-group mt-4">
                         <label className="form-label">Use of Funds (%)</label>
                         <input name="useOfFunds" className="form-input" placeholder="e.g. 60% Eng, 30% GTM, 10% Ops" value={data.details.useOfFunds} onChange={handleDetailsChange} />
                     </div>
-                    <div className="form-group flex-col">
+                    <div className="form-group">
                         <label className="form-label text-success font-bold">Milestone Achieved by Next Round *</label>
-                        <textarea name="milestone" className="form-textarea border-success" placeholder="e.g. $1M ARR with 120% NRR..." value={data.details.milestone} onChange={handleDetailsChange} />
+                        <textarea
+                            name="milestone"
+                            className="form-textarea"
+                            style={{ borderColor: 'rgba(16, 185, 129, 0.3)' }}
+                            placeholder="e.g. $1M ARR with 120% NRR..."
+                            value={data.details.milestone}
+                            onChange={handleDetailsChange}
+                        />
                     </div>
                 </div>
 
-                <div className="card">
+                <div className="card animate-fade-in-up">
                     <h2 className="card-title mb-6">Investor Funnel</h2>
-                    <form className="mb-6 bg-surface-elevated p-4 rounded" onSubmit={addInvestor}>
+                    <form className="mb-6 p-4 rounded" style={{ background: 'var(--bg-surface-elevated)' }} onSubmit={addInvestor}>
                         <div className="grid-2">
-                            <div className="form-group flex-col">
+                            <div className="form-group">
                                 <label className="form-label">Investor Name</label>
                                 <input name="name" className="form-input" value={invForm.name} onChange={handleInvChange} required />
                             </div>
-                            <div className="form-group flex-col">
+                            <div className="form-group">
                                 <label className="form-label">Firm/Stage</label>
                                 <input name="stage" className="form-input" placeholder="e.g. YC, Seed" value={invForm.stage} onChange={handleInvChange} />
                             </div>
                         </div>
-                        <div className="form-group flex-col">
+                        <div className="form-group">
                             <label className="form-label">Pipeline Status</label>
                             <select name="status" className="form-select" value={invForm.status} onChange={handleInvChange}>
                                 <option>Contacted</option>
@@ -123,11 +141,12 @@ export function Fundraising() {
 
                     <h3 className="text-secondary uppercase text-xs font-bold tracking-widest mb-3">Active Tracker</h3>
                     {data.investors.length === 0 ? <p className="text-sm text-secondary">No investors tracked.</p> : null}
-                    <div className="flex-col gap-3">
+                    <div className="flex-col gap-3 stagger-children">
                         {data.investors.map(inv => (
-                            <div key={inv.id} className={`p-4 rounded border flex justify-between items-center group
-                ${inv.status === 'Closed' ? 'border-success bg-brand-success bg-opacity-10' :
-                                    inv.status === 'Passed' ? 'border-danger opacity-50' : 'border-color bg-surface-elevated'}`}
+                            <div
+                                key={inv.id}
+                                className="p-4 rounded border flex justify-between items-center group animate-fade-in-up"
+                                style={getStatusStyle(inv.status)}
                             >
                                 <div>
                                     <h4 className="font-bold mb-1">{inv.name}</h4>
@@ -135,10 +154,10 @@ export function Fundraising() {
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <span className={`badge ${inv.status === 'Closed' ? 'badge-green' :
-                                            inv.status === 'Term Sheet' ? 'badge-blue' :
-                                                inv.status === 'Passed' ? 'badge-red' : 'badge-yellow'
+                                        inv.status === 'Term Sheet' ? 'badge-blue' :
+                                            inv.status === 'Passed' ? 'badge-red' : 'badge-yellow'
                                         }`}>{inv.status}</span>
-                                    <button className="text-danger text-xs hover:underline opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeInvestor(inv.id)}>Remove</button>
+                                    <button className="text-danger text-xs opacity-0 group-hover:opacity-100 transition-opacity" style={{ cursor: 'pointer', background: 'none', border: 'none' }} onClick={() => removeInvestor(inv.id)}>Remove</button>
                                 </div>
                             </div>
                         ))}

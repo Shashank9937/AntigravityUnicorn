@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 const SLIDES = [
     { id: 'purpose', title: 'Company Purpose', desc: 'Single declarative sentence. What do you do?' },
     { id: 'problem', title: 'The Problem', desc: 'Describe the pain of the customer. How is this addressed today?' },
-    { id: 'solution', title: 'The Solution', desc: 'Show, don\'t just tell. Demonstrate your value proposition.' },
+    { id: 'solution', title: 'The Solution', desc: "Show, don't just tell. Demonstrate your value proposition." },
     { id: 'why_now', title: 'Why Now?', desc: 'Historical category evolution. Recent trends making your solution possible.' },
     { id: 'market', title: 'Market Size', desc: 'Identify your target customer. Calculate the TAM (Top Down & Bottom Up).' },
     { id: 'competition', title: 'Competition', desc: 'The 2x2 grid. Show why you are 10x better or completely differentiated.' },
@@ -49,37 +49,51 @@ export function PitchDeck() {
 
     return (
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
-            <div className="page-header">
+            <header className="page-header">
                 <h1 className="page-title">Pitch Deck Constructor</h1>
                 <p className="page-description">The Sequoia Framework. Build the narrative. Secure the capital.</p>
-            </div>
+            </header>
 
-            <div className="mb-6 card flex items-center justify-between border-brand-primary">
+            <div className="mb-6 card flex items-center justify-between" style={{ borderColor: 'rgba(99, 102, 241, 0.3)' }}>
                 <div>
                     <h2 className="text-secondary uppercase text-sm font-bold tracking-widest mb-1">Deck Readiness</h2>
-                    <div className="text-4xl font-black text-brand-primary">{progress}%</div>
+                    <div className="text-3xl font-black" style={{ color: 'var(--brand-primary)' }}>{progress}%</div>
                 </div>
-                <div className="w-1/2 bg-surface-elevated rounded-full h-4 overflow-hidden relative border border-color">
-                    <motion.div
-                        className="absolute top-0 left-0 h-full bg-brand-primary"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.5 }}
-                    />
+                <div style={{ width: '50%' }}>
+                    <div className="progress-bar" style={{ height: 10, border: '1px solid var(--border-color)' }}>
+                        <motion.div
+                            className="progress-bar-fill"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ duration: 0.5 }}
+                        />
+                    </div>
                 </div>
             </div>
 
-            <div className="grid-2">
+            <div className="grid-2 stagger-children">
                 {SLIDES.map((slide, i) => (
                     <motion.div
                         key={slide.id}
-                        className={`card flex-col gap-3 ${deck[slide.id]?.status === 'Done' ? 'border-brand-success bg-brand-success bg-opacity-5' : 'border-color'}`}
+                        className="card animate-fade-in-up flex-col gap-3"
+                        style={{
+                            borderColor: deck[slide.id]?.status === 'Done'
+                                ? 'rgba(16, 185, 129, 0.3)'
+                                : 'var(--border-color)',
+                            background: deck[slide.id]?.status === 'Done'
+                                ? 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(16, 185, 129, 0.03) 100%)'
+                                : 'var(--bg-surface)',
+                        }}
                         layout
                     >
                         <div className="flex justify-between items-start">
                             <h3 className="font-bold text-lg"><span className="text-secondary text-sm mr-2">{i + 1}.</span>{slide.title}</h3>
                             <select
-                                className={`form-select text-xs w-32 py-1 ${deck[slide.id]?.status === 'Done' ? 'text-success' : deck[slide.id]?.status === 'Drafting' ? 'text-warning' : 'text-secondary'}`}
+                                className="form-select text-xs py-1"
+                                style={{
+                                    width: 120,
+                                    color: deck[slide.id]?.status === 'Done' ? '#34d399' : deck[slide.id]?.status === 'Drafting' ? '#fbbf24' : 'var(--text-secondary)',
+                                }}
                                 value={deck[slide.id]?.status}
                                 onChange={(e) => handleUpdate(slide.id, 'status', e.target.value)}
                             >
@@ -89,7 +103,7 @@ export function PitchDeck() {
                                 <option>Done</option>
                             </select>
                         </div>
-                        <p className="text-sm text-secondary italic border-l-2 border-brand-primary pl-2">{slide.desc}</p>
+                        <p className="text-sm text-secondary italic pl-2" style={{ borderLeft: '2px solid var(--brand-primary)' }}>{slide.desc}</p>
                         <textarea
                             className="form-textarea mt-2 text-sm"
                             placeholder="Draft your talking points or slide copy here..."
