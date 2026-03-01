@@ -10,8 +10,17 @@ import {
   Scale,
   CalendarCheck,
   Rocket,
-  ArrowRight
+  ArrowRight,
+  AlertTriangle
 } from 'lucide-react';
+
+const AARRR_METRICS = [
+  { key: 'acquisition', label: 'Acquisition (Traffic)', target: 1000 },
+  { key: 'activation', label: 'Activation (Signups %)', target: 20 },
+  { key: 'retention', label: 'Retention (W1 Active %)', target: 40 },
+  { key: 'revenue', label: 'Revenue (Paying %)', target: 5 },
+  { key: 'referral', label: 'Referral (K-Factor)', target: 0.2 },
+];
 
 export function MissionControl() {
   const [data, setData] = useState(null);
@@ -20,19 +29,58 @@ export function MissionControl() {
     setData(loadData());
   }, []);
 
-  const stats = useMemo(() => {
+  const intelligence = useMemo(() => {
     if (!data) return null;
+
+    // Active idea count
     const ideas = data.ideasList?.length || 0;
     const activeIdeas = data.ideasList?.filter(i => i.status === 'Active')?.length || 0;
-    const competitors = data.competitors?.length || 0;
-    const weeklyReviews = data.weekly?.length || 0;
-    const mrr = data.kpis?.current?.mrr || 0;
-    const runway = data.kpis?.current?.runway || 0;
-    const legalDone = data.legal
-      ? Object.values(data.legal).filter(v => v === true).length
-      : 0;
-    const investors = data.fundraising?.investors?.length || 0;
-    return { ideas, activeIdeas, competitors, weeklyReviews, mrr, runway, legalDone, investors };
+
+    // Validation progress %
+    const passedWeeks = data.validation ? Object.values(data.validation).filter(w => w.passed).length : 0;
+    const validationProgress = (passedWeeks / 4) * 100;
+
+    // Moat strength score
+    const moatScore = data.moat?.confidence || 0;
+
+    // Legal completion %
+    const legalDone = data.legal ? Object.values(data.legal).filter(v => v === true).length : 0;
+    const legalProgress = (legalDone / 8) * 100;
+
+    // Current bottleneck from AARRR
+    let bottleneck = 'None';
+    if (data.growth && data.growth.metrics) {
+      const calculateHealth = (key, val) => {
+        const target = AARRR_METRICS.find(m => m.key === key).target;
+        return val / target;
+      };
+      const metrics = data.growth.metrics;
+      const scores = Object.keys(metrics).map(k => ({ key: k, ratio: calculateHealth(k, metrics[k]) }));
+
+      if (scores.length > 0) {
+        const worst = scores.reduce((prev, curr) => (prev.ratio < curr.ratio ? prev : curr), scores[0]);
+        const found = AARRR_METRICS.find(m => m.key === worst.key);
+        bottleneck = found ? found.label : 'None';
+      }
+    }
+
+    // Latest weekly note
+    let latestNote = 'No weekly reviews logged yet.';
+    if (data.weekly && data.weekly.length > 0) {
+      // Assume the first one is the latest (since it's usually prepended)
+      const latestInfo = data.weekly[0];
+      latestNote = latestInfo.learnings || latestInfo.wins || `Week starting ${latestInfo.date}`;
+    }
+
+    // Incomplete status check
+    const isSectionIncomplete = ideas === 0 || passedWeeks === 0 || legalDone < 8 || moatScore === 0;
+
+    return {
+      ideas, activeIdeas, validationProgress, moatScore, legalProgress,
+      bottleneck, latestNote, legalDone, isSectionIncomplete,
+      mrr: data.kpis?.current?.mrr || 0,
+      runway: data.kpis?.current?.runway || 0
+    };
   }, [data]);
 
   const quickActions = [
@@ -44,51 +92,76 @@ export function MissionControl() {
     { path: '/launch-playbook', label: 'Launch Playbook', icon: Rocket, color: '#f87171' },
   ];
 
-  if (!stats) return null;
+  if (!intelligence) return null;
 
   return (
     <div>
-      <header className="page-header">
-        <h1 className="page-title">⚡ Mission Control</h1>
-        <p className="page-description">
-          Your founder dashboard. Everything at a glance.
-        </p>
+      <header className="page-header flex justify-between items-start">
+        <div>
+          <h1 className="page-title">⚡ Mission Control</h1>
+          <p className="page-description">
+            Your founder dashboard. Everything at a glance.
+          </p>
+        </div>
+        {intelligence.isSectionIncomplete && (
+          <div className="badge badge-yellow flex items-center gap-1 mt-2">
+            <AlertTriangle size={14} /> System Incomplete
+          </div>
+        )}
       </header>
 
-      {/* KPI Strip */}
+      {/* DASHBOARD INTELLIGENCE LAYER */}
       <section className="dashboard-grid mb-8 stagger-children" aria-label="Key metrics">
         <div className="stat-card animate-fade-in-up">
-          <div className="stat-label">Total Ideas</div>
-          <div className="stat-value text-brand-primary">{stats.ideas}</div>
-          <div className="stat-hint">{stats.activeIdeas} active</div>
+          <div className="stat-label">Active Ideas</div>
+          <div className="stat-value text-brand-primary">{intelligence.activeIdeas}</div>
+          <div className="stat-hint">Out of {intelligence.ideas} total</div>
         </div>
+
         <div className="stat-card animate-fade-in-up">
-          <div className="stat-label">MRR</div>
-          <div className="stat-value text-success">${stats.mrr.toLocaleString()}</div>
-          <div className="stat-hint">Monthly recurring</div>
+          <div className="stat-label">Validation Progress</div>
+          <div className="stat-value text-success">{intelligence.validationProgress}%</div>
+          <div className="stat-hint">Sprint completion</div>
         </div>
+
+        <div className="stat-card animate-fade-in-up">
+          <div className="stat-label">Moat Strength</div>
+          <div className="stat-value" style={{ color: intelligence.moatScore >= 8 ? '#34d399' : intelligence.moatScore >= 5 ? '#fbbf24' : '#f87171' }}>
+            {intelligence.moatScore}<span className="text-secondary text-lg ml-1">/10</span>
+          </div>
+          <div className="stat-hint">{intelligence.moatScore < 5 ? 'Highly vulnerable' : 'Defensible'}</div>
+        </div>
+
+        <div className="stat-card animate-fade-in-up">
+          <div className="stat-label">Legal Setup</div>
+          <div className="stat-value">{intelligence.legalProgress}%</div>
+          <div className="stat-hint">{intelligence.legalDone}/8 compliance items</div>
+        </div>
+
+        <div className="stat-card animate-fade-in-up">
+          <div className="stat-label">Core Bottleneck (AARRR)</div>
+          <div className="stat-value text-warning text-lg leading-tight mt-1">{intelligence.bottleneck}</div>
+          <div className="stat-hint mt-1">Focus engineering here</div>
+        </div>
+
         <div className="stat-card animate-fade-in-up">
           <div className="stat-label">Runway</div>
-          <div className="stat-value" style={{ color: stats.runway < 6 ? '#f87171' : '#34d399' }}>
-            {stats.runway}<span className="text-secondary text-lg ml-1">mo</span>
+          <div className="stat-value" style={{ color: intelligence.runway < 6 ? '#f87171' : '#34d399' }}>
+            {intelligence.runway}<span className="text-secondary text-lg ml-1">mo</span>
           </div>
-          <div className="stat-hint">{stats.runway < 6 ? 'Critical — act now' : 'Healthy buffer'}</div>
+          <div className="stat-hint">{intelligence.runway < 6 ? 'Critical — act now' : 'Healthy buffer'}</div>
         </div>
-        <div className="stat-card animate-fade-in-up">
-          <div className="stat-label">Competitors</div>
-          <div className="stat-value">{stats.competitors}</div>
-          <div className="stat-hint">Mapped in landscape</div>
-        </div>
-        <div className="stat-card animate-fade-in-up">
-          <div className="stat-label">Weekly Reviews</div>
-          <div className="stat-value">{stats.weeklyReviews}</div>
-          <div className="stat-hint">Execution cadence</div>
-        </div>
-        <div className="stat-card animate-fade-in-up">
-          <div className="stat-label">Legal</div>
-          <div className="stat-value">{stats.legalDone}<span className="text-secondary text-lg">/8</span></div>
-          <div className="stat-hint">Compliance items</div>
-        </div>
+      </section>
+
+      {/* Latest Weekly Note display */}
+      <section className="mb-8 card animate-fade-in-up" style={{
+        borderColor: 'rgba(245, 158, 11, 0.2)',
+        background: 'var(--bg-surface-elevated)',
+      }}>
+        <h2 className="text-sm uppercase font-bold tracking-widest text-warning mb-2 flex items-center gap-2">
+          <CalendarCheck size={16} /> Latest Weekly Note
+        </h2>
+        <p className="text-secondary italic">"{intelligence.latestNote}"</p>
       </section>
 
       {/* Quick Actions */}

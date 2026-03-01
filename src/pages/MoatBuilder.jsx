@@ -66,18 +66,18 @@ export function MoatBuilder() {
                         <input type="number" className="form-input" value={moat.timeline} onChange={(e) => handleChange('timeline', e.target.value)} />
                     </div>
                     <div className="form-group">
-                        <label className="form-label">How defensible on a 1-5 scale?</label>
+                        <label className="form-label">How defensible on a 1-10 scale?</label>
                         <input
                             type="range"
                             min="1"
-                            max="5"
+                            max="10"
                             value={moat.confidence}
                             onChange={(e) => handleChange('confidence', Number(e.target.value))}
                         />
                         <div className="flex justify-between text-xs text-secondary mt-1">
                             <span>Weak</span>
-                            <span className="font-bold" style={{ color: moat.confidence >= 4 ? '#34d399' : moat.confidence >= 3 ? '#fbbf24' : '#f87171' }}>
-                                {moat.confidence}/5
+                            <span className="font-bold" style={{ color: moat.confidence >= 8 ? '#34d399' : moat.confidence >= 5 ? '#fbbf24' : '#f87171' }}>
+                                {moat.confidence}/10
                             </span>
                             <span>Fortress</span>
                         </div>

@@ -1843,3 +1843,11 @@ th {
 .group:hover .tooltip {
   opacity: 1;
 }
+.is-saving button, 
+.is-saving input, 
+.is-saving textarea, 
+.is-saving select {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
